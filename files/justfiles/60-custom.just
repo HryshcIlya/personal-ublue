@@ -13,26 +13,21 @@ toggle-flathub-verified:
 
 # Toggle container policy between insecureAcceptAnything and reject
 toggle-container-policy:
-    #!/usr/bin/bash
-    POLICY_FILE="/usr/etc/containers/policy.json"
-
+    #!/usr/bin/pkexec /usr/bin/bash
+    POLICY_FILE="/etc/containers/policy.json"
     if [ ! -f "$POLICY_FILE" ]; then
-        echo "Error: $POLICY_FILE does not exist."
+        echo "Policy file not found: $POLICY_FILE"
         exit 1
     fi
 
-    current_policy=$(grep -oP '(?<="default": \[{"type": ")[^"]*' "$POLICY_FILE")
+    CURRENT_POLICY=$(jq -r '.default[] | select(.type == "insecureAcceptAnything" or .type == "reject") | .type' "$POLICY_FILE")
 
-    if [ "$current_policy" == "insecureAcceptAnything" ]; then
-        sudo sed -i 's/"default": \[{"type": "insecureAcceptAnything"}\]/"default": [{"type": "reject"}]/' "$POLICY_FILE"
-        echo "Policy changed from insecureAcceptAnything to reject"
-    elif [ "$current_policy" == "reject" ]; then
-        sudo sed -i 's/"default": \[{"type": "reject"}\]/"default": [{"type": "insecureAcceptAnything"}]/' "$POLICY_FILE"
-        echo "Policy changed from reject to insecureAcceptAnything"
+    if [ "$CURRENT_POLICY" == "insecureAcceptAnything" ]; then
+        jq 'walk(if type == "object" and .type == "insecureAcceptAnything" then .type = "reject" else . end)' "$POLICY_FILE" | sudo tee "$POLICY_FILE" > /dev/null
+        echo "Policy switched to reject."
+    elif [ "$CURRENT_POLICY" == "reject" ]; then
+        jq 'walk(if type == "object" and .type == "reject" then .type = "insecureAcceptAnything" else . end)' "$POLICY_FILE" | sudo tee "$POLICY_FILE" > /dev/null
+        echo "Policy switched to insecureAcceptAnything."
     else
-        echo "Current policy is neither insecureAcceptAnything nor reject. Manual check required."
-        exit 1
+        echo "No matching policy found to toggle."
     fi
-
-    new_policy=$(grep -oP '(?<="default": \[{"type": ")[^"]*' "$POLICY_FILE")
-    echo "New policy is: $new_policy"
