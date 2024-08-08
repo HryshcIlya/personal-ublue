@@ -1,0 +1,12 @@
+modules:
+  - type: rpm-ostree
+    repos:
+      - https://copr.fedorainfracloud.org/coprs/ublue-os/staging/repo/fedora-%OS_VERSION%/ublue-os-staging-fedora-%OS_VERSION%.repo?arch=x86_64
+    install:
+      - ptyxis
+    remove:
+      - gnome-terminal-nautilus
+
+  - type: script
+    scripts:
+      - hide_gnome_terminal.sh
