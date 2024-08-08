@@ -1,0 +1,9 @@
+modules:
+  - type: justfiles
+    include:
+      - 84-bazzite-virt.just
+
+  - type: systemd
+    system:
+      enabled:
+        - bazzite-libvirtd-setup.service
