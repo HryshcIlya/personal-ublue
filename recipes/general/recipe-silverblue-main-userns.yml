@@ -12,6 +12,7 @@ image-version: latest # latest is also supported if you want new updates ASAP
 modules:
   - from-file: ptyxis.yml
   - from-file: virtualization.yml
+  - from-file: waydroid.yml
 
   - type: justfiles
     include:

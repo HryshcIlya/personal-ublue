@@ -1,0 +1,43 @@
+modules:
+    - type: rpm-ostree
+      repos:
+          - https://copr.fedorainfracloud.org/coprs/kylegospo/bazzite-multilib/repo/fedora-%OS_VERSION%/kylegospo-bazzite-multilib-fedora-%OS_VERSION%.repo?arch=x86_64
+          - https://copr.fedorainfracloud.org/coprs/kylegospo/bazzite/repo/fedora-%OS_VERSION%/kylegospo-bazzite-fedora-%OS_VERSION%.repo
+      install:
+          - gamescope.x86_64
+          - gamescope-libs.i686
+          - gamescope-shaders
+          - gamescope-legacy
+          - rocm-hip
+          - rocm-opencl
+          - rocm-clinfo
+          - waydroid
+          - cage
+          - wlr-randr
+          - lzip
+
+    - type: files
+      files:
+          - source: system
+            destination: /
+
+    - type: script
+      scripts:
+          - modify_waydroid_net.sh
+
+    - type: systemd
+      system:
+          enabled:
+              - gamescope-workaround.service
+              - waydroid-workaround.service
+              - waydroid-fix.service
+          disabled:
+              - waydroid-container.service
+
+    - type: script
+      scripts:
+          - waydroid-choose-gpu.sh
+          - update_waydroid_launcher.sh
+    - type: justfiles
+      include:
+          - 82-bazzite-waydroid.just
